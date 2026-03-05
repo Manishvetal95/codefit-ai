@@ -1,0 +1,20 @@
+{
+  "name": "ai-mentor-root",
+  "version": "1.0.0",
+  "description": "Root package for AI Mentor MERN stack deployment",
+  "scripts": {
+    "start": "node server/server.js",
+    "server": "cd server && npm start",
+    "client": "cd client && npm run dev",
+    "install-client": "cd client && npm install",
+    "install-server": "cd server && npm install",
+    "install-all": "npm run install-server && npm run install-client",
+    "build": "npm run install-all && cd client && npm run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
