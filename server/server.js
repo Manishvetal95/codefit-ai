@@ -10,6 +10,10 @@ const rateLimit = require('express-rate-limit');
 dotenv.config();
 
 const app = express();
+
+
+app.set('trust proxy', 1);   // ⭐ MUST for Render / rate-limit / real IP
+
 const PORT = process.env.PORT || 5000;
 
 // Security Middleware - Relaxed CSP for Gemini and local media
@@ -68,14 +72,16 @@ app.get('/api/health', async (req, res) => {
 
 // Serve frontend in production
 if (process.env.NODE_ENV === 'production') {
-  // Set static folder
+
   app.use(express.static(path.join(__dirname, '../client/dist')));
 
-  // Any route not matching API routes should be handled by React
-  app.get('*', (req, res) => {
+  app.use((req, res) => {
     res.sendFile(path.resolve(__dirname, '../client', 'dist', 'index.html'));
   });
-}
+
+} // ✅ VERY IMPORTANT closing bracket
+
+
 
 // Final Error Handler
 app.use((err, req, res, next) => {
@@ -91,13 +97,9 @@ app.use((err, req, res, next) => {
   }
 });
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB Connected'))
-  .catch(err => {
-    console.error('MongoDB Connection Error:', err);
-    process.exit(1);
-  });
+ 
+
+
 
 // Global Error Handlers
 process.on('unhandledRejection', (err) => {
@@ -111,9 +113,21 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-  if (!process.env.GEMINI_API_KEY) {
-    console.warn('WARNING: GEMINI_API_KEY is not set in environment variables!');
-  }
-});
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log('MongoDB Connected');
+
+    app.listen(PORT, () => {
+      console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+
+      if (!process.env.GEMINI_API_KEY) {
+        console.warn('WARNING: GEMINI_API_KEY is not set in environment variables!');
+      }
+    });
+
+  })
+  .catch(err => {
+    console.error('MongoDB Connection Error:', err);
+    process.exit(1);
+  });
