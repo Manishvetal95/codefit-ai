@@ -109,8 +109,8 @@ process.on('unhandledRejection', (err) => {
 
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
-  // For uncaught exceptions, it is recommended to exit and let a process manager restart
-  process.exit(1);
+  // Wait a second to ensure Render flushes the error logs before the process dies
+  setTimeout(() => process.exit(1), 1000);
 });
 
 
@@ -129,5 +129,6 @@ mongoose.connect(process.env.MONGO_URI)
   })
   .catch(err => {
     console.error('MongoDB Connection Error:', err);
-    process.exit(1);
+    // Wait a second to ensure Render flushes the error logs before the process dies
+    setTimeout(() => process.exit(1), 1000);
   });
